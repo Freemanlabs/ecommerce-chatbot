@@ -24,7 +24,7 @@ def summarize_conversation(state: AgentState):
 
 
 def get_query(messages: Sequence[BaseMessage]):
-    query = ""
+    query = "ask me to rephrase"
     for message in reversed(messages):
         if message.type == "human":
             query = message.content

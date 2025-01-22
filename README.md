@@ -1,6 +1,6 @@
 # ecommerce-chatbot
 
-A simple e-ccomerce agent (chatbot) designed to handle customer support queries. This tool greatly improved data visibility and decision-making efficiency.
+A simple e-commerce agent (chatbot) designed to handle customer support queries. This tool greatly improved data visibility and decision-making efficiency.
 
 ## Description
 This chatbot is built using Python and utilizes machine learning techniques to understand and respond to user inputs.
@@ -11,6 +11,7 @@ This chatbot is built using Python and utilizes machine learning techniques to u
 - [LangChain](https://www.langchain.com/)
 - [LangGraph](https://www.langchain.com/langgraph)
 - [Google API](https://aistudio.google.com/app/)
+- [OpenAI API](https://openai.com/index/openai-api/)
 
 ## Installation
 
