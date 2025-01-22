@@ -107,20 +107,8 @@ def generate(state: AgentState):
 # Agent (Chatbot) node
 def agent(state: AgentState):
     model = llm.bind_tools(tools)
-    print("====conversation====")
-    print(get_conversation(state["messages"]))
     response = model.invoke([system_message] + state["messages"])
     return {"messages": [response]}
-
-
-# Agent (Chatbot) node
-# def agent(state: AgentState):
-#     query = state["messages"][-1].content
-#     context = "\n\n".join(doc.page_content for doc in state["context"])
-#     conversation = state["messages"][:-1]
-
-#     response = chain.invoke({"user_input": query, "context": context, "conversation": conversation})
-#     return {"messages": [response]}
 
 
 def build_graph():
