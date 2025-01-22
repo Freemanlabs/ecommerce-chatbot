@@ -3,7 +3,7 @@ langchain
 langchain-community
 langchain-chroma
 langchain-google-genai
-langchain_openai
+langchain-openai
 langgraph
 langchainhub
 pandas

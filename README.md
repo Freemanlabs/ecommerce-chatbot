@@ -39,8 +39,8 @@ This chatbot is built using Python and utilizes machine learning techniques to u
 
     Create a `.env` file in the project root and add the necessary configuration details (e.g., API keys, database URLs). An example of what is requires is shown in the `dotenv` file
 
-    1. **Get a Cohere API Key:**
-        - Sign up at [Google AI Studio](https://aistudio.google.com/app/apikey).
+    1. **Get a Google or OpenAI API Key:**
+        - Sign up at [Google AI Studio](https://aistudio.google.com/app/apikey) or [OpenAI API](https://openai.com/index/openai-api/).
         - Click **Create API key**.
         - Copy your API key.
 
@@ -48,6 +48,7 @@ This chatbot is built using Python and utilizes machine learning techniques to u
 
     ```plaintext
     GOOGLE_API_KEY=your-google-api-key
+    OPENAI_API_KEY=your-openai-api-key
     ```
 
 ## Usage
