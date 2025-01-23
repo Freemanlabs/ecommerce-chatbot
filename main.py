@@ -18,8 +18,12 @@ if __name__ == "__main__":
 
     def stream_graph_updates(user_input: str):
         for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}, config):
-            for value in event.values():
-                print("Agent:", value["messages"][-1].content)
+            for key, value in event.items():
+                if (key != "rewriter") and len(value["messages"][-1].content) > 0:
+                    if key == "tools" and value["messages"][-1].name == "return_policy":
+                        continue
+                    print("Agent:", value["messages"][-1].content)
+                pass
 
     while True:
         user_input = input("User: ")

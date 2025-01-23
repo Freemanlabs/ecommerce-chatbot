@@ -8,13 +8,14 @@ from pydantic import BaseModel, Field
 
 from agent import llm, retrieve_return_policy
 from prompts import generator_rag_prompt, grader_prompt, rewriter_prompt, system_message
-from tools import check_order_status, save_user_info
+from tools import check_order_status, request_human_assistance
 
-tools = [check_order_status, save_user_info, retrieve_return_policy]
+tools = [check_order_status, request_human_assistance, retrieve_return_policy]
 tool_node = ToolNode(tools)
 
 
 class AgentState(TypedDict):
+    query: str
     messages: Annotated[list[BaseMessage], add_messages]
 
 
@@ -35,7 +36,7 @@ def get_query(messages: Sequence[BaseMessage]):
 def get_retrieved_documents(messages: Sequence[BaseMessage]):
     recent_retriever_messages = []
     for message in reversed(messages):
-        if message.type == "tool" and message.name == "return_policy":
+        if message.type == "tool":
             recent_retriever_messages.append(message)
         else:
             break
@@ -65,26 +66,30 @@ def grade_documents(state: AgentState):
 
         binary_score: str = Field(description="Relevance score 'yes' or 'no'")
 
-    llm_with_structured_op = llm.with_structured_output(grade)
+    last_message = state["messages"][-1]
+    if last_message.name == "return_policy":
+        llm_with_structured_op = llm.with_structured_output(grade)
 
-    chain = grader_prompt | llm_with_structured_op
+        chain = grader_prompt | llm_with_structured_op
 
-    query = get_query(state["messages"])
-    docs = get_retrieved_documents(state["messages"])
+        query = state["query"]
+        docs = get_retrieved_documents(state["messages"])
 
-    scored_result = chain.invoke({"question": query, "context": docs})
-    score = scored_result.binary_score
+        scored_result = chain.invoke({"question": query, "context": docs})
+        score = scored_result.binary_score
 
-    if score == "yes":
-        return "generator"
-    else:
-        return "rewriter"
+        if score == "yes":
+            return "generator"
+        else:
+            return "rewriter"
+
+    return END
 
 
 def rewrite(state: AgentState):
     chain = rewriter_prompt | llm
 
-    query = get_query(state["messages"])
+    query = state["query"]
     conversation = get_conversation(state["messages"])
 
     print("Rewriting query...")
@@ -94,7 +99,7 @@ def rewrite(state: AgentState):
 
 
 def generate(state: AgentState):
-    query = get_query(state["messages"])
+    query = state["query"]
     context = get_retrieved_documents(state["messages"])
     conversation = get_conversation(state["messages"])
 
@@ -107,8 +112,11 @@ def generate(state: AgentState):
 # Agent (Chatbot) node
 def agent(state: AgentState):
     model = llm.bind_tools(tools)
+
+    query = get_query(state["messages"])
+
     response = model.invoke([system_message] + state["messages"])
-    return {"messages": [response]}
+    return {"messages": [response], "query": query}
 
 
 def build_graph():
@@ -125,7 +133,7 @@ def build_graph():
     # Define edges
     workflow.add_edge(START, "agent")
     workflow.add_conditional_edges("agent", route_to_tools, ["tools", END])
-    workflow.add_conditional_edges("tools", grade_documents, ["generator", "rewriter"])
+    workflow.add_conditional_edges("tools", grade_documents, ["generator", "rewriter", END])
 
     # workflow.add_edge("tools", "agent")
     workflow.add_edge("rewriter", "agent")
